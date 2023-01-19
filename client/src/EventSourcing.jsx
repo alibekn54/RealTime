@@ -10,14 +10,11 @@ const LongPulling = () => {
     }, [])
 
     const subscribe = async () => {
-        try {
-            const {data} = await axios.get('http://localhost:5000/get-messages')
-            setMessages(prevState => [data, ...prevState])
-            await subscribe()
-        } catch (e) {
-            setTimeout( () => {
-                subscribe()
-            }, 500)
+        const eventSource = new EventSource('http://localhost:5000/connect')
+        eventSource.onmessage = function (event) {
+            const message = JSON.parse(event.data);
+            setMessages(prev => [message, ...prev])
+
         }
     }
 
