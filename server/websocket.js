@@ -1,23 +1,29 @@
 const ws = require('ws');
 
-const wss = new WebSocket.Server({
+const wss = new ws.Server({
     port: 5000,
 
 }, () => console.log('server started on 5000'))
 
-wss.on('connection', function connection(ws) {
-    ws.on('message', function (message){
+
+wss.on('connection', function (ws) {
+    ws.id = Date.now()
+
+    ws.on('message', function (message) {
         message = JSON.parse(message);
         switch (message.event) {
             case 'message':
-
+                broadcastMessage(message)
+                break;
+            case 'connection':
+                broadcastMessage(message)
+                break;
         }
     })
 })
 
-const message = {
-    event: "message/connection",
-    id: 1243,
-    date: '21.01.2022',
-    message: 'Put like'
+function broadcastMessage(message, id) {
+    wss.clients.forEach(client => {
+        client.send(JSON.stringify(message));
+    })
 }
